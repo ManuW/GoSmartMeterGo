@@ -18,7 +18,7 @@ Das Projekt teilt sich in ein lokales Erfassungssystem auf dem Raspberry Pi und 
 
 ```mermaid
 graph TD
-    subgraph Raspberry Pi (lokal)
+    subgraph pi["Raspberry Pi (lokal)"]
         A[Infrarot-Lesekopf] -->|SML via Seriell| B(Go-Daemon)
         C[Netzwerk / PV-Anlage] -->|SMA Speedwire Multicast| B
         B -->|Live-Stream SSE| D[Lokales Dashboard :8080]
@@ -26,7 +26,7 @@ graph TD
         B -->|Periodischer Rsync / SSH| F[Strato Webspace]
     end
 
-    subgraph Strato Cloud
+    subgraph cloud["Strato Cloud"]
         F -->|Backups| G[(sqlite.db Kopien)]
         H[Browser / User] -->|HTTPS Basic Auth| I[Online-Dashboard]
         I -->|api.php| G

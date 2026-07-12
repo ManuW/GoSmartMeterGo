@@ -26,7 +26,7 @@ The project is split into a local collection daemon on the Raspberry Pi and an o
 
 ```mermaid
 graph TD
-    subgraph Raspberry Pi (local)
+    subgraph pi["Raspberry Pi (local)"]
         A[Infrared Reader] -->|SML via Serial| B(Go Daemon)
         C[Network / PV System] -->|SMA Speedwire Multicast| B
         B -->|Live Stream SSE| D[Local Dashboard :8080]
@@ -34,7 +34,7 @@ graph TD
         B -->|Periodic Rsync / SSH| F[Strato Webspace]
     end
 
-    subgraph Strato Cloud
+    subgraph cloud["Strato Cloud"]
         F -->|Backups| G[(sqlite.db Copies)]
         H[Browser / User] -->|HTTPS Basic Auth| I[Online Dashboard]
         I -->|api.php| G
