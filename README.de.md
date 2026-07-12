@@ -2,6 +2,8 @@
 
 *GoSmartMeterGo* ist ein in Go geschriebenes Tool zur Erfassung, Archivierung und Visualisierung von Stromverbrauchs- und Stromeinspeisungsdaten auf dem Raspberry Pi.
 
+![GoSmartMeterGo Dashboard](doc/dashboard.png)
+
 ---
 
 ## Funktionsweise

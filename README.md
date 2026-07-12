@@ -10,6 +10,8 @@ TODO: Check AI code for correctness and security.
 
 *GoSmartMeterGo* is a tool written in Go to collect, archive, and visualize electricity consumption and feed-in data on a Raspberry Pi.
 
+![GoSmartMeterGo Dashboard](doc/dashboard.png)
+
 ---
 
 ## How it works
