@@ -71,6 +71,9 @@ try {
             exit;
         }
 
+        $start = $start . 'T00:00:00';
+        $end = $end . 'T23:59:59.999999999';
+
         // Berechnet über LAG() für lückenlose Übergänge
         $stmt = $db->prepare("
             WITH daily_max AS (

@@ -540,6 +540,8 @@ function loadDailyUsageData() {
             endD = new Date(startD.getFullYear(), startD.getMonth() + 1, 0); // Last day of month
         }
         
+        startD.setHours(0, 0, 0, 0);
+        endD.setHours(23, 59, 59, 999);
         isToday = endD >= new Date() && startD <= new Date();
 
         const sStr = `${startD.getFullYear()}-${(startD.getMonth()+1).toString().padStart(2,'0')}-${startD.getDate().toString().padStart(2,'0')}`;
