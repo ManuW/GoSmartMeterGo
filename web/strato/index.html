@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoSmartMeterGo Dashboard</title>
+    <meta name="description" content="Echtzeit-Visualisierung von SmartMeter und SMA HomeManager Daten mit historischem Reporting.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- CSS Style -->
+    <link rel="stylesheet" href="index.css?v=1.9">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <h1 class="app-title">GoSmartMeterGo</h1>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <button id="theme-toggle" class="btn" title="Theme wechseln" style="padding: 0.35rem 0.6rem; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border-radius: 9999px;">
+                    <span id="theme-toggle-icon">☀️</span>
+                </button>
+                <div class="connection-badges">
+                    <span id="sml-status" class="badge badge-error">SML: getrennt</span>
+                    <span id="sma-status" class="badge badge-error">SMA: getrennt</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- SML Zählerstand -->
+        <section class="card">
+            <div class="card-header">
+                <h2>SmartMeter Zähler (SML)</h2>
+            </div>
+            <div class="metrics-list">
+                <div class="metric-item">
+                    <span class="metric-name">Gesamtabnahme (+A)</span>
+                    <span class="metric-val" id="sml-import-val">0.00 kWh</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-name">Gesamteinspeisung (-A)</span>
+                    <span class="metric-val" id="sml-export-val">0.00 kWh</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- SMA Status -->
+        <section class="card">
+            <div class="card-header">
+                <h2>HomeManager 2.0 (SMA)</h2>
+            </div>
+            <div class="metrics-list">
+                <div class="metric-item">
+                    <span class="metric-name">Gesamtabnahme (+A)</span>
+                    <span class="metric-val" id="sma-import-val">0.00 kWh</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-name">Gesamteinspeisung (-A)</span>
+                    <span class="metric-val" id="sma-export-val">0.00 kWh</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Autarkie / Tageswerte -->
+        <section class="card">
+            <div class="card-header">
+                <h2>Tageswerte</h2>
+            </div>
+            <div class="metrics-list">
+                <div class="metric-item">
+                    <span class="metric-name">Verbrauch (SML)</span>
+                    <span class="metric-val" id="sml-today-consumed">0.00 kWh</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-name">Verbrauch (SMA)</span>
+                    <span class="metric-val" id="sma-today-consumed">0.00 kWh</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-name">Einspeisung (SML)</span>
+                    <span class="metric-val" id="sml-today-delivered">0.00 kWh</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-name">Einspeisung (SMA)</span>
+                    <span class="metric-val" id="sma-today-delivered">0.00 kWh</span>
+                </div>
+                <div class="metric-item">
+                    <span class="metric-name">Letztes Update</span>
+                    <span class="metric-val" id="last-update-time">-</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="card large-card" id="history-section">
+            <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 1rem;">
+                <div class="card-header-row">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <h2 id="history-chart-title">Leistungsverlauf (Heute)</h2>
+                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;" onclick="toggleFullscreen('history-section')">&#x26F6;</button>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="btn" onclick="navigateHistory(-7)">&laquo;</button>
+                        <button class="btn" onclick="navigateHistory(-1)">&lsaquo;</button>
+                        <button class="btn active" id="btn-date-today" onclick="navigateHistory('today')">Heute</button>
+                        <button class="btn" onclick="navigateHistory(1)">&rsaquo;</button>
+                        <button class="btn" onclick="navigateHistory(7)">&raquo;</button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div class="chart-controls">
+                        <button class="btn active" id="btn-src-sma" onclick="setHistorySource('SMA')">SMA</button>
+                        <button class="btn" id="btn-src-sml" onclick="setHistorySource('SML')">SML</button>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="btn active" id="btn-mode-both" onclick="setHistoryMode('both')">Beide</button>
+                        <button class="btn" id="btn-mode-import" onclick="setHistoryMode('import')">Bezug</button>
+                        <button class="btn" id="btn-mode-export" onclick="setHistoryMode('export')">Einspeisung</button>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="historyChart"></canvas>
+            </div>
+        </section>
+
+        <!-- Tagesstatistik Chart -->
+        <section class="card large-card" id="daily-section">
+            <div class="card-header" style="flex-direction: column; align-items: stretch; gap: 1rem;">
+                <div class="card-header-row">
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <h2 id="daily-chart-title">Tagesübersicht</h2>
+                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;" onclick="toggleFullscreen('daily-section')">&#x26F6;</button>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="btn" onclick="navigateDaily(-1)">&lsaquo;</button>
+                        <button class="btn active" id="btn-daily-date-today" onclick="navigateDaily('today')">Aktuell</button>
+                        <button class="btn" onclick="navigateDaily(1)">&rsaquo;</button>
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                    <div class="chart-controls">
+                        <button class="btn" id="btn-daily-scope-day" onclick="setDailyScope('day')">Tag</button>
+                        <button class="btn active" id="btn-daily-scope-week" onclick="setDailyScope('week')">Woche</button>
+                        <button class="btn" id="btn-daily-scope-10days" onclick="setDailyScope('10days')">10 Tage</button>
+                        <button class="btn" id="btn-daily-scope-month" onclick="setDailyScope('month')">Monat</button>
+                        <button class="btn" id="btn-daily-scope-year" onclick="setDailyScope('year')">Jahr</button>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="btn active" id="btn-daily-src-sma" onclick="setDailySource('SMA')">SMA</button>
+                        <button class="btn" id="btn-daily-src-sml" onclick="setDailySource('SML')">SML</button>
+                    </div>
+                    <div class="chart-controls">
+                        <button class="btn active" id="btn-daily-mode-both" onclick="setDailyMode('both')">Beide</button>
+                        <button class="btn" id="btn-daily-mode-import" onclick="setDailyMode('import')">Verbrauch</button>
+                        <button class="btn" id="btn-daily-mode-export" onclick="setDailyMode('export')">Einspeisung</button>
+                    </div>
+                </div>
+            </div>
+            <div class="chart-container">
+                <canvas id="dailyChart"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer class="app-footer" style="display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+        <p>GoSmartMeterGo &copy; 2026. Made with &hearts; in Go &amp; Antigravity.</p>
+    </footer>
+
+    <!-- JS Logic -->
+    <script src="index.js?v=1.9"></script>
+</body>
+</html>

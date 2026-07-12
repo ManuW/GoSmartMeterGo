@@ -1,0 +1,62 @@
+# Binaries
+/gosmartmeter
+/gosmartmeter-*
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+*.prof
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Local environment/configuration overrides
+.env
+.env.*
+!.env.example
+config.local.yaml
+config.yaml.local
+
+# SQLite databases
+smartmeter.db
+smartmeter.db-journal
+smartmeter.db-shm
+smartmeter.db-wal
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Operating System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDEs / Editors
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# AI Agents
+/.agents/
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class

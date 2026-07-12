@@ -1,0 +1,22 @@
+[Unit]
+Description=GoSmartMeterGo Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=gosmartmeter
+Group=gosmartmeter
+WorkingDirectory=/var/lib/gosmartmeter
+ExecStart=/usr/local/bin/gosmartmeter run --config /etc/gosmartmeter/config.yaml
+Restart=always
+RestartSec=5s
+
+# Security hardening
+ProtectSystem=full
+ProtectHome=true
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

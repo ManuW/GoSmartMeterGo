@@ -1,0 +1,51 @@
+name: "gosmartmeter"
+arch: "${ARCH}"
+platform: "linux"
+version: "1.4.3"
+section: "utils"
+priority: "optional"
+maintainer: "mawe"
+description: "SML Smart Meter Reader & SMA HomeManager Monitor"
+homepage: "https://github.com/mawe/GoSmartMeterGo"
+license: "MIT"
+
+depends:
+  - systemd
+
+recommends:
+  - nginx
+  - openssl
+
+contents:
+  # Application Binary
+  - src: "../${BINARY_SOURCE}"
+    dst: "/usr/local/bin/gosmartmeter"
+    expand: true
+    file_info:
+      mode: 0755
+
+  # Systemd service
+  - src: "gosmartmeter.service"
+    dst: "/lib/systemd/system/gosmartmeter.service"
+    file_info:
+      mode: 0644
+
+  # Nginx proxy site config
+  - src: "nginx.conf"
+    dst: "/etc/nginx/sites-available/gosmartmeter"
+    file_info:
+      mode: 0644
+
+  # Configuration file template
+  - src: "../config.yaml"
+    dst: "/etc/gosmartmeter/config.yaml.example"
+
+  # Database and state directory
+  - dst: "/var/lib/gosmartmeter"
+    type: dir
+
+scripts:
+  preinstall: "scripts/preinstall.sh"
+  postinstall: "scripts/postinstall.sh"
+  preremove: "scripts/prerm.sh"
+  postremove: "scripts/postremove.sh"

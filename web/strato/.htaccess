@@ -1,0 +1,13 @@
+# 1. Schutz vor direktem Download der Datenbankdateien
+<Files ~ "\.db$">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# 2. Passwortschutz (HTTP Basic Auth) für das gesamte Dashboard
+# Entferne das '#' am Anfang der nächsten 4 Zeilen, um den Schutz zu aktivieren.
+
+#AuthType Basic
+#AuthName "SmartMeter Dashboard"
+#AuthUserFile /mnt/a/b/c/d/htdocs/test/www/.htpasswd
+#Require valid-user

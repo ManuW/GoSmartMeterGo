@@ -1,0 +1,45 @@
+# GoSmartMeterGo Default Configuration
+
+# Optical Serial SML Port Settings (for Logarex LK13BE)
+serial:
+  port: "/dev/ttyAMA0"
+  baud_rate: 9600
+  data_bits: 8
+  parity: "none"
+  stop_bits: 1
+  rts: true # Powers the optical probe
+
+# SMA Speedwire UDP Multicast Settings
+speedwire:
+  multicast_group: "239.12.255.254"
+  port: 9522
+  timeout_seconds: 120 # Trigger alert if no multicast packet for 2 minutes
+
+# Local SQLite Storage Settings
+database:
+  path: "smartmeter.db"
+
+# Telegram Bot Alerts & Reports (Optional)
+telegram:
+  enabled: false
+  bot_token: "YOUR_TELEGRAM_BOT_TOKEN_HERE"
+  chat_ids:
+    - "YOUR_CHAT_ID_HERE"
+
+# Web Dashboard Server Settings
+web:
+  host: "0.0.0.0"
+  port: 8080
+
+# Remote Strato/Rsync Backup Settings
+backup:
+  enabled: false
+  provider: "rsync"
+  interval_hours: 6
+  keep_revisions: 10
+  rsync:
+    host: "ssh.strato.de"
+    username: "DEIN_STRATO_USER"
+    remote_path: "/mnt/web/a/b/c/htdocs/test/www/backups"
+    ssh_key_path: "/home/pi/.ssh/id_ed25519"
+
