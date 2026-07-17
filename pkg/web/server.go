@@ -60,6 +60,17 @@ func (s *Server) Start() error {
 		w.Write(data)
 	})
 
+	// Browser.html route
+	mux.HandleFunc("/browser", func(w http.ResponseWriter, r *http.Request) {
+		data, err := assets.ReadFile("assets/browser.html")
+		if err != nil {
+			http.Error(w, "Not Found", http.StatusNotFound)
+			return
+		}
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(data)
+	})
+
 	// API endpoints
 	mux.HandleFunc("/api/live/stream", s.handleLiveStream)
 	mux.HandleFunc("/api/history", s.handleHistory)

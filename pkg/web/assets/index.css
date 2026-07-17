@@ -340,12 +340,20 @@ body {
 .metric-name {
     font-size: 0.875rem;
     color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex-shrink: 1;
+    min-width: 0;
 }
 
 .metric-val {
     font-size: 0.95rem;
     font-weight: 600;
     color: var(--text-color);
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-left: 1rem;
 }
 
 /* Large Charts */

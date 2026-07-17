@@ -1,6 +1,16 @@
 // Charts instances
 let historyChart = null;
 let dailyChart = null;
+let liveSparklineChart = null;
+const sparklinePoints = 300; // 5 Minuten (bei ca. 1 Update / Sek)
+const liveSparklineData = Array(sparklinePoints).fill(0);
+
+// Helper for German formatting of decimal numbers
+const formatNumber = (num, decimals) => {
+    if (num == null || isNaN(num)) return "0";
+    return num.toLocaleString('de-DE', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+};
+
 
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -101,17 +111,17 @@ function updateBadge(id, active, prefix) {
 
 // --- Helper: Update meter detail values (SML or SMA card) ---
 function updateMeterValues(idPrefix, data, keyPrefix, phaseOrder) {
-    document.getElementById(`${idPrefix}-import-val`).innerText = `${(data[`${keyPrefix}_energy_import`] / 1000).toFixed(2)} kWh`;
-    document.getElementById(`${idPrefix}-export-val`).innerText = `${(data[`${keyPrefix}_energy_export`] / 1000).toFixed(2)} kWh`;
+    document.getElementById(`${idPrefix}-import-val`).innerText = `${formatNumber(data[`${keyPrefix}_energy_import`] / 1000, 2)} kWh`;
+    document.getElementById(`${idPrefix}-export-val`).innerText = `${formatNumber(data[`${keyPrefix}_energy_export`] / 1000, 2)} kWh`;
 
     const totalPower = data[`${keyPrefix}_power_import`] > 0 ? data[`${keyPrefix}_power_import`] : -data[`${keyPrefix}_power_export`];
     document.getElementById(`${idPrefix}-power-total-val`).innerText = `${totalPower > 0 ? "+" : ""}${Math.round(totalPower)} W`;
 
     const [p1, p2, p3] = phaseOrder;
     document.getElementById(`${idPrefix}-power-phases-val`).innerText = `${Math.round(data[`${keyPrefix}_power_${p1}`])} / ${Math.round(data[`${keyPrefix}_power_${p2}`])} / ${Math.round(data[`${keyPrefix}_power_${p3}`])} W`;
-    document.getElementById(`${idPrefix}-voltage-phases-val`).innerText = `${data[`${keyPrefix}_voltage_${p1}`].toFixed(1)} / ${data[`${keyPrefix}_voltage_${p2}`].toFixed(1)} / ${data[`${keyPrefix}_voltage_${p3}`].toFixed(1)} V`;
-    document.getElementById(`${idPrefix}-current-phases-val`).innerText = `${data[`${keyPrefix}_current_${p1}`].toFixed(2)} / ${data[`${keyPrefix}_current_${p2}`].toFixed(2)} / ${data[`${keyPrefix}_current_${p3}`].toFixed(2)} A`;
-    document.getElementById(`${idPrefix}-freq-val`).innerText = `${data[`${keyPrefix}_frequency`].toFixed(2)} Hz`;
+    document.getElementById(`${idPrefix}-voltage-phases-val`).innerText = `${formatNumber(data[`${keyPrefix}_voltage_${p1}`], 1)} / ${formatNumber(data[`${keyPrefix}_voltage_${p2}`], 1)} / ${formatNumber(data[`${keyPrefix}_voltage_${p3}`], 1)} V`;
+    document.getElementById(`${idPrefix}-current-phases-val`).innerText = `${formatNumber(data[`${keyPrefix}_current_${p1}`], 2)} / ${formatNumber(data[`${keyPrefix}_current_${p2}`], 2)} / ${formatNumber(data[`${keyPrefix}_current_${p3}`], 2)} A`;
+    document.getElementById(`${idPrefix}-freq-val`).innerText = `${formatNumber(data[`${keyPrefix}_frequency`], 2)} Hz`;
     document.getElementById(`${idPrefix}-interval-val`).innerText = `${data[`${keyPrefix}_interval_ms`] || 0} ms`;
 }
 
@@ -144,9 +154,6 @@ function applyPowerState(elements, isImport) {
     if (elements.card) {
         elements.card.className = `card live-card ${isImport ? 'import' : 'surplus'}`;
     }
-    if (elements.bar) {
-        elements.bar.style.backgroundColor = isImport ? '#f59e0b' : '#10b981';
-    }
 }
 
 // --- Helper: Reset power display to inactive/no-data state ---
@@ -166,9 +173,6 @@ function resetPowerState(elements) {
     }
     if (elements.card) {
         elements.card.className = "card live-card";
-    }
-    if (elements.bar) {
-        elements.bar.style.width = "0%";
     }
 }
 
@@ -218,7 +222,6 @@ function updateLiveDashboard(data) {
         pulse: document.getElementById('sml-power-pulse'),
         val: document.getElementById('sml-power-val'),
         label: document.getElementById('sml-power-label'),
-        bar: document.getElementById('sml-power-bar-fill'),
         valBase: 'power-value',
         labelBase: 'power-label',
     };
@@ -226,10 +229,14 @@ function updateLiveDashboard(data) {
     if (smlActive) {
         const { value, isImport } = getPowerState(sml, 'sml');
         smlElements.val.innerText = `${Math.round(value)} W`;
-        smlElements.bar.style.width = `${Math.min((value / 6000) * 100, 100)}%`;
         applyPowerState(smlElements, isImport);
+        
+        // Update Sparkline
+        const realValue = isImport ? value : -value;
+        updateSparkline(realValue);
     } else {
         resetPowerState(smlElements);
+        updateSparkline(0);
     }
 
     // SMA Power Display (Secondary)
@@ -237,8 +244,8 @@ function updateLiveDashboard(data) {
         pulse: document.getElementById('sma-power-pulse'),
         val: document.getElementById('sma-power-val'),
         label: document.getElementById('sma-power-label'),
-        valBase: 'sma-value',
-        labelBase: 'sma-status-text',
+        valBase: 'power-value',
+        labelBase: 'power-label',
     };
 
     if (smaActive) {
@@ -396,6 +403,55 @@ function initCharts() {
             }
         }
     });
+
+    const sparkCtx = document.getElementById('live-sparkline');
+    if (sparkCtx) {
+        liveSparklineChart = new Chart(sparkCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: Array(sparklinePoints).fill(''),
+                datasets: [{
+                    data: liveSparklineData,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.2,
+                    fill: {
+                        target: 'origin',
+                        above: 'rgba(245, 158, 11, 0.2)', // Light orange for import
+                        below: 'rgba(16, 185, 129, 0.2)'  // Light green for export
+                    },
+                    segment: {
+                        borderColor: ctx => (ctx.p1 && ctx.p1.parsed.y < 0) ? '#10b981' : '#f59e0b'
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false, // Turn off heavy animations for live data
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { 
+                        display: false,
+                        // Fix Y axis slightly to avoid jumpy scale, or let it auto-scale.
+                        // Let's suggest auto-scale but ensure 0 is always centered if we want.
+                        // We will let it auto-scale naturally.
+                    }
+                }
+            }
+        });
+    }
+}
+
+function updateSparkline(newValue) {
+    if (!liveSparklineChart) return;
+    liveSparklineData.push(newValue);
+    liveSparklineData.shift();
+    liveSparklineChart.update('none'); // Update without animation for snappiness
 }
 
 // Load historical data for Line Chart
@@ -579,10 +635,10 @@ function loadDailyUsageData() {
                     smaDelivered = (todayVal.sma_delivered_wh || 0) / 1000.0;
                 }
                 if (document.getElementById('sml-today-consumed')) {
-                    document.getElementById('sml-today-consumed').innerText = `${smlConsumed.toFixed(2)} kWh`;
-                    document.getElementById('sml-today-delivered').innerText = `${smlDelivered.toFixed(2)} kWh`;
-                    document.getElementById('sma-today-consumed').innerText = `${smaConsumed.toFixed(2)} kWh`;
-                    document.getElementById('sma-today-delivered').innerText = `${smaDelivered.toFixed(2)} kWh`;
+                    document.getElementById('sml-today-consumed').innerText = `${formatNumber(smlConsumed, 2)} kWh`;
+                    document.getElementById('sml-today-delivered').innerText = `${formatNumber(smlDelivered, 2)} kWh`;
+                    document.getElementById('sma-today-consumed').innerText = `${formatNumber(smaConsumed, 2)} kWh`;
+                    document.getElementById('sma-today-delivered').innerText = `${formatNumber(smaDelivered, 2)} kWh`;
                 }
             }
         })

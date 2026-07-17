@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wertebrowser - GoSmartMeterGo</title>
+    <link rel="stylesheet" href="/assets/index.css?v=1.9">
+    <style>
+        .browser-container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .browser-controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .browser-table-wrapper { overflow-x: auto; border-radius: 12px; background: var(--card-bg); border: 1px solid var(--border-color); backdrop-filter: blur(16px); }
+        .browser-table { width: 100%; border-collapse: collapse; text-align: right; }
+        .browser-table th, .browser-table td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--metric-border); }
+        .browser-table th { background: rgba(0,0,0,0.1); color: var(--text-muted); font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .browser-table td { font-family: 'Inter', monospace; font-variant-numeric: tabular-nums; font-size: 0.95rem; color: var(--text-color); }
+        .browser-table th:first-child, .browser-table td:first-child { text-align: left; }
+        .browser-table tr:last-child td { border-bottom: none; }
+        .browser-table tbody tr:hover { background: rgba(255,255,255,0.03); }
+        input[type="date"] { background: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); padding: 0.5rem 1rem; border-radius: 8px; font-family: 'Inter', sans-serif; cursor: pointer;}
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.8); cursor: pointer; }
+        [data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator { filter: none; }
+    </style>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-container">
+            <h1 class="app-title">GoSmartMeterGo</h1>
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <a href="/" class="btn" title="Zurück zum Dashboard" style="padding: 0.35rem 0.6rem; font-size: 0.9rem; border-radius: 9999px; text-decoration: none;">🏠 Dashboard</a>
+                <button id="theme-toggle" class="btn" title="Theme wechseln" style="padding: 0.35rem 0.6rem; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border-radius: 9999px;">
+                    <span id="theme-toggle-icon">☀️</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="browser-container">
+        <div class="browser-controls">
+            <h2 style="font-size: 1.5rem; font-weight: 700; color: var(--text-color);">Wertebrowser</h2>
+            <div style="display: flex; gap: 1rem; align-items: center;">
+                <button id="btn-export-csv" class="btn" title="Aktuellen Tag als CSV exportieren" style="padding: 0.5rem 1rem; font-size: 0.9rem; border-radius: 8px;" disabled>📥 CSV Export</button>
+                <label for="date-picker" style="color: var(--text-muted); font-size: 0.9rem; font-weight: 500;">Datum:</label>
+                <input type="date" id="date-picker">
+            </div>
+        </div>
+
+        <div class="browser-table-wrapper">
+            <table class="browser-table">
+                <thead>
+                    <tr>
+                        <th>Uhrzeit</th>
+                        <th>SML Bezug</th>
+                        <th>SML Einspeisung</th>
+                        <th>SMA Bezug</th>
+                        <th>SMA Einspeisung</th>
+                    </tr>
+                </thead>
+                <tbody id="table-body">
+                    <tr><td colspan="5" style="text-align: center; padding: 2rem;">Lade Daten...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="/assets/browser.js"></script>
+</body>
+</html>

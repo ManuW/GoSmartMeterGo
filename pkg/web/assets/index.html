@@ -5,20 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoSmartMeterGo Dashboard</title>
     <meta name="description" content="Echtzeit-Visualisierung von SmartMeter und SMA HomeManager Daten mit historischem Reporting.">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- CSS Style -->
     <link rel="stylesheet" href="/assets/index.css?v=1.9">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chart.js (Local) -->
+    <script src="/assets/chart.js"></script>
 </head>
 <body>
     <header class="app-header">
         <div class="header-container">
             <h1 class="app-title">GoSmartMeterGo</h1>
             <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <a href="/browser" class="btn" title="Wertebrowser (Rohdaten)" style="padding: 0.35rem 0.6rem; font-size: 0.9rem; border-radius: 9999px; text-decoration: none;">📋 Daten</a>
                 <button id="theme-toggle" class="btn" title="Theme wechseln" style="padding: 0.35rem 0.6rem; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; border-radius: 9999px;">
                     <span id="theme-toggle-icon">☀️</span>
                 </button>
@@ -47,17 +44,15 @@
                 <div class="power-label-top">SmartMeter (SML)</div>
                 <div class="power-value" id="sml-power-val">0 W</div>
                 <div class="power-label" id="sml-power-label">Keine Daten</div>
-                <div class="power-indicator-bar">
-                    <div class="indicator-fill" id="sml-power-bar-fill"></div>
+                <div class="power-sparkline-container" style="height: 50px; width: 100%; margin-top: 1rem; position: relative;">
+                    <canvas id="live-sparkline"></canvas>
                 </div>
             </div>
             <!-- SMA Nebenanzeige -->
-            <div class="sma-display-row">
-                <div class="sma-display-info">
-                    <span class="sma-label">HomeManager (SMA):</span>
-                    <span class="sma-value" id="sma-power-val">0 W</span>
-                </div>
-                <span class="sma-status-text" id="sma-power-label">Keine Daten</span>
+            <div class="power-display" style="border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: 1rem;">
+                <div class="power-label-top">HomeManager (SMA)</div>
+                <div class="power-value" id="sma-power-val" style="font-size: 2.5rem;">0 W</div>
+                <div class="power-label" id="sma-power-label">Keine Daten</div>
             </div>
         </section>
 
