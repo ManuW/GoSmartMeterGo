@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GoSmartMeterGo Dashboard</title>
     <meta name="description" content="Echtzeit-Visualisierung von SmartMeter und SMA HomeManager Daten mit historischem Reporting.">
+    <!-- Favicon (SVG Emoji) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -99,25 +101,25 @@
                 <div class="card-header-row">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <h2 id="history-chart-title">Leistungsverlauf (Heute)</h2>
-                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;" onclick="toggleFullscreen('history-section')">&#x26F6;</button>
+                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;">&#x26F6;</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn" onclick="navigateHistory(-7)">&laquo;</button>
-                        <button class="btn" onclick="navigateHistory(-1)">&lsaquo;</button>
-                        <button class="btn active" id="btn-date-today" onclick="navigateHistory('today')">Heute</button>
-                        <button class="btn" onclick="navigateHistory(1)">&rsaquo;</button>
-                        <button class="btn" onclick="navigateHistory(7)">&raquo;</button>
+                        <button class="btn">&laquo;</button>
+                        <button class="btn">&lsaquo;</button>
+                        <button class="btn active" id="btn-date-today">Heute</button>
+                        <button class="btn">&rsaquo;</button>
+                        <button class="btn">&raquo;</button>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                     <div class="chart-controls">
-                        <button class="btn active" id="btn-src-sma" onclick="setHistorySource('SMA')">SMA</button>
-                        <button class="btn" id="btn-src-sml" onclick="setHistorySource('SML')">SML</button>
+                        <button class="btn active" id="btn-src-sma">SMA</button>
+                        <button class="btn" id="btn-src-sml">SML</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn active" id="btn-mode-both" onclick="setHistoryMode('both')">Beide</button>
-                        <button class="btn" id="btn-mode-import" onclick="setHistoryMode('import')">Bezug</button>
-                        <button class="btn" id="btn-mode-export" onclick="setHistoryMode('export')">Einspeisung</button>
+                        <button class="btn active" id="btn-mode-both">Beide</button>
+                        <button class="btn" id="btn-mode-import">Bezug</button>
+                        <button class="btn" id="btn-mode-export">Einspeisung</button>
                     </div>
                 </div>
             </div>
@@ -132,30 +134,30 @@
                 <div class="card-header-row">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <h2 id="daily-chart-title">Tagesübersicht</h2>
-                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;" onclick="toggleFullscreen('daily-section')">&#x26F6;</button>
+                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;">&#x26F6;</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn" onclick="navigateDaily(-1)">&lsaquo;</button>
-                        <button class="btn active" id="btn-daily-date-today" onclick="navigateDaily('today')">Aktuell</button>
-                        <button class="btn" onclick="navigateDaily(1)">&rsaquo;</button>
+                        <button class="btn">&lsaquo;</button>
+                        <button class="btn active" id="btn-daily-date-today">Aktuell</button>
+                        <button class="btn">&rsaquo;</button>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                     <div class="chart-controls">
-                        <button class="btn" id="btn-daily-scope-day" onclick="setDailyScope('day')">Tag</button>
-                        <button class="btn active" id="btn-daily-scope-week" onclick="setDailyScope('week')">Woche</button>
-                        <button class="btn" id="btn-daily-scope-10days" onclick="setDailyScope('10days')">10 Tage</button>
-                        <button class="btn" id="btn-daily-scope-month" onclick="setDailyScope('month')">Monat</button>
-                        <button class="btn" id="btn-daily-scope-year" onclick="setDailyScope('year')">Jahr</button>
+                        <button class="btn" id="btn-daily-scope-day">Tag</button>
+                        <button class="btn active" id="btn-daily-scope-week">Woche</button>
+                        <button class="btn" id="btn-daily-scope-10days">10 Tage</button>
+                        <button class="btn" id="btn-daily-scope-month">Monat</button>
+                        <button class="btn" id="btn-daily-scope-year">Jahr</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn active" id="btn-daily-src-sma" onclick="setDailySource('SMA')">SMA</button>
-                        <button class="btn" id="btn-daily-src-sml" onclick="setDailySource('SML')">SML</button>
+                        <button class="btn active" id="btn-daily-src-sma">SMA</button>
+                        <button class="btn" id="btn-daily-src-sml">SML</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn active" id="btn-daily-mode-both" onclick="setDailyMode('both')">Beide</button>
-                        <button class="btn" id="btn-daily-mode-import" onclick="setDailyMode('import')">Verbrauch</button>
-                        <button class="btn" id="btn-daily-mode-export" onclick="setDailyMode('export')">Einspeisung</button>
+                        <button class="btn active" id="btn-daily-mode-both">Beide</button>
+                        <button class="btn" id="btn-daily-mode-import">Verbrauch</button>
+                        <button class="btn" id="btn-daily-mode-export">Einspeisung</button>
                     </div>
                 </div>
             </div>
@@ -170,6 +172,6 @@
     </footer>
 
     <!-- JS Logic -->
-    <script src="index.js?v=1.9"></script>
+    <script type="module" src="js/app.js?v=1.9"></script>
 </body>
 </html>
