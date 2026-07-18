@@ -13,6 +13,10 @@ import { updateBadge, updateMeterValues, getPowerState, applyPowerState, resetPo
 
 let lastHistoryUpdateMinute = -1;
 
+let liveSparklineChart = null;
+const sparklinePoints = 120; // 2 minutes of data at 1 sec intervals
+const liveSparklineData = Array(sparklinePoints).fill(0);
+
 document.addEventListener('DOMContentLoaded', () => {
     initTheme((theme) => {
         updateChartsForTheme(theme, historyChart, dailyChart);
@@ -25,6 +29,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadLatestTotals();
     loadHistoryData();
     loadDailyUsageData();
+    initSparkline();
     
     // Attach event listeners for History Chart UI
     document.getElementById('btn-src-sma')?.addEventListener('click', () => setHistorySource('SMA'));
@@ -60,6 +65,52 @@ document.addEventListener('DOMContentLoaded', () => {
     
     document.getElementById('btn-daily-fullscreen')?.addEventListener('click', () => toggleFullscreen('daily-section'));
 });
+
+function initSparkline() {
+    const sparkCtx = document.getElementById('live-sparkline');
+    if (sparkCtx && window.Chart) {
+        liveSparklineChart = new Chart(sparkCtx.getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: Array(sparklinePoints).fill(''),
+                datasets: [{
+                    data: liveSparklineData,
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    tension: 0.2,
+                    fill: {
+                        target: 'origin',
+                        above: 'rgba(245, 158, 11, 0.2)', // Light orange for import
+                        below: 'rgba(16, 185, 129, 0.2)'  // Light green for export
+                    },
+                    segment: {
+                        borderColor: ctx => (ctx.p1 && ctx.p1.parsed.y < 0) ? '#10b981' : '#f59e0b'
+                    }
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { enabled: false }
+                },
+                scales: {
+                    x: { display: false },
+                    y: { display: false }
+                }
+            }
+        });
+    }
+}
+
+function updateSparkline(newValue) {
+    if (!liveSparklineChart) return;
+    liveSparklineData.push(newValue);
+    liveSparklineData.shift();
+    liveSparklineChart.update('none'); // Update without animation for snappiness
+}
 
 function startLiveStream() {
     const smlBadge = document.getElementById('sml-status');
@@ -141,8 +192,13 @@ export function updateLiveDashboard(data) {
         if(smlElements.val) smlElements.val.innerText = `${formatNum(value, 0)} W`;
         if(smlElements.bar) smlElements.bar.style.width = `${Math.min((value / 6000) * 100, 100)}%`;
         applyPowerState(smlElements, isImport);
+        
+        // Update Sparkline
+        const realValue = isImport ? value : -value;
+        updateSparkline(realValue);
     } else {
         resetPowerState(smlElements);
+        updateSparkline(0);
     }
 
     const smaElements = {
