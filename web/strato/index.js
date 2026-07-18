@@ -89,19 +89,28 @@ function updateBadge(id, active, prefix) {
     }
 }
 
+// --- Helper: Format number with German locale ---
+function formatNum(value, fractionDigits = 2) {
+    if (value === undefined || value === null || isNaN(value)) return "0,00";
+    return value.toLocaleString('de-DE', {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits
+    });
+}
+
 // --- Helper: Update meter detail values (SML or SMA card) ---
 function updateMeterValues(idPrefix, data, keyPrefix, phaseOrder) {
-    document.getElementById(`${idPrefix}-import-val`).innerText = `${(data[`${keyPrefix}_energy_import`] / 1000).toFixed(2)} kWh`;
-    document.getElementById(`${idPrefix}-export-val`).innerText = `${(data[`${keyPrefix}_energy_export`] / 1000).toFixed(2)} kWh`;
+    document.getElementById(`${idPrefix}-import-val`).innerText = `${formatNum(data[`${keyPrefix}_energy_import`] / 1000)} kWh`;
+    document.getElementById(`${idPrefix}-export-val`).innerText = `${formatNum(data[`${keyPrefix}_energy_export`] / 1000)} kWh`;
 
     const totalPower = data[`${keyPrefix}_power_import`] > 0 ? data[`${keyPrefix}_power_import`] : -data[`${keyPrefix}_power_export`];
-    document.getElementById(`${idPrefix}-power-total-val`).innerText = `${totalPower > 0 ? "+" : ""}${Math.round(totalPower)} W`;
+    document.getElementById(`${idPrefix}-power-total-val`).innerText = `${totalPower > 0 ? "+" : ""}${formatNum(totalPower, 0)} W`;
 
     const [p1, p2, p3] = phaseOrder;
-    document.getElementById(`${idPrefix}-power-phases-val`).innerText = `${Math.round(data[`${keyPrefix}_power_${p1}`])} / ${Math.round(data[`${keyPrefix}_power_${p2}`])} / ${Math.round(data[`${keyPrefix}_power_${p3}`])} W`;
-    document.getElementById(`${idPrefix}-voltage-phases-val`).innerText = `${data[`${keyPrefix}_voltage_${p1}`].toFixed(1)} / ${data[`${keyPrefix}_voltage_${p2}`].toFixed(1)} / ${data[`${keyPrefix}_voltage_${p3}`].toFixed(1)} V`;
-    document.getElementById(`${idPrefix}-current-phases-val`).innerText = `${data[`${keyPrefix}_current_${p1}`].toFixed(2)} / ${data[`${keyPrefix}_current_${p2}`].toFixed(2)} / ${data[`${keyPrefix}_current_${p3}`].toFixed(2)} A`;
-    document.getElementById(`${idPrefix}-freq-val`).innerText = `${data[`${keyPrefix}_frequency`].toFixed(2)} Hz`;
+    document.getElementById(`${idPrefix}-power-phases-val`).innerText = `${formatNum(data[`${keyPrefix}_power_${p1}`], 0)} / ${formatNum(data[`${keyPrefix}_power_${p2}`], 0)} / ${formatNum(data[`${keyPrefix}_power_${p3}`], 0)} W`;
+    document.getElementById(`${idPrefix}-voltage-phases-val`).innerText = `${formatNum(data[`${keyPrefix}_voltage_${p1}`], 1)} / ${formatNum(data[`${keyPrefix}_voltage_${p2}`], 1)} / ${formatNum(data[`${keyPrefix}_voltage_${p3}`], 1)} V`;
+    document.getElementById(`${idPrefix}-current-phases-val`).innerText = `${formatNum(data[`${keyPrefix}_current_${p1}`], 2)} / ${formatNum(data[`${keyPrefix}_current_${p2}`], 2)} / ${formatNum(data[`${keyPrefix}_current_${p3}`], 2)} A`;
+    document.getElementById(`${idPrefix}-freq-val`).innerText = `${formatNum(data[`${keyPrefix}_frequency`], 2)} Hz`;
     document.getElementById(`${idPrefix}-interval-val`).innerText = `${data[`${keyPrefix}_interval_ms`] || 0} ms`;
 }
 
@@ -247,6 +256,18 @@ const baseChartOptions = {
     plugins: {
         legend: {
             labels: { color: '#9ca3af', font: { family: 'Inter' } }
+        },
+        tooltip: {
+            callbacks: {
+                label: function(context) {
+                    let label = context.dataset.label || '';
+                    if (label) label += ': ';
+                    if (context.parsed.y !== null) {
+                        label += formatNum(context.parsed.y, 2);
+                    }
+                    return label;
+                }
+            }
         }
     },
     scales: {
@@ -256,7 +277,13 @@ const baseChartOptions = {
         },
         y: {
             grid: { color: 'rgba(255, 255, 255, 0.03)' },
-            ticks: { color: '#9ca3af', font: { family: 'Inter', size: 10 } }
+            ticks: { 
+                color: '#9ca3af', 
+                font: { family: 'Inter', size: 10 },
+                callback: function(value) {
+                    return formatNum(value, 0);
+                }
+            }
         }
     }
 };
@@ -569,10 +596,10 @@ function loadDailyUsageData() {
                     smaDelivered = (todayVal.sma_delivered_wh || 0) / 1000.0;
                 }
                 if (document.getElementById('sml-today-consumed')) {
-                    document.getElementById('sml-today-consumed').innerText = `${smlConsumed.toFixed(2)} kWh`;
-                    document.getElementById('sml-today-delivered').innerText = `${smlDelivered.toFixed(2)} kWh`;
-                    document.getElementById('sma-today-consumed').innerText = `${smaConsumed.toFixed(2)} kWh`;
-                    document.getElementById('sma-today-delivered').innerText = `${smaDelivered.toFixed(2)} kWh`;
+                    document.getElementById('sml-today-consumed').innerText = `${formatNum(smlConsumed)} kWh`;
+                    document.getElementById('sml-today-delivered').innerText = `${formatNum(smlDelivered)} kWh`;
+                    document.getElementById('sma-today-consumed').innerText = `${formatNum(smaConsumed)} kWh`;
+                    document.getElementById('sma-today-delivered').innerText = `${formatNum(smaDelivered)} kWh`;
                 }
             }
         })
@@ -776,16 +803,16 @@ function loadLatestTotals() {
         .then(data => {
             if (data) {
                 if (data.sml_import_wh !== undefined) {
-                    document.getElementById('sml-import-val').innerText = `${(data.sml_import_wh / 1000).toFixed(2)} kWh`;
+                    document.getElementById('sml-import-val').innerText = `${formatNum(data.sml_import_wh / 1000)} kWh`;
                 }
                 if (data.sml_export_wh !== undefined) {
-                    document.getElementById('sml-export-val').innerText = `${(data.sml_export_wh / 1000).toFixed(2)} kWh`;
+                    document.getElementById('sml-export-val').innerText = `${formatNum(data.sml_export_wh / 1000)} kWh`;
                 }
                 if (data.sma_import_wh !== undefined) {
-                    document.getElementById('sma-import-val').innerText = `${(data.sma_import_wh / 1000).toFixed(2)} kWh`;
+                    document.getElementById('sma-import-val').innerText = `${formatNum(data.sma_import_wh / 1000)} kWh`;
                 }
                 if (data.sma_export_wh !== undefined) {
-                    document.getElementById('sma-export-val').innerText = `${(data.sma_export_wh / 1000).toFixed(2)} kWh`;
+                    document.getElementById('sma-export-val').innerText = `${formatNum(data.sma_export_wh / 1000)} kWh`;
                 }
                 if (data.timestamp) {
                     const lastUpdate = new Date(data.timestamp);
