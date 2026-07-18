@@ -197,7 +197,7 @@ func (m *DBManager) GetDailyUsage(start, end time.Time) ([]DailyUsage, error) {
 	query := `
 	WITH daily_max AS (
 		SELECT 
-			strftime('%Y-%m-%d', timestamp) as date,
+			strftime('%Y-%m-%d', timestamp, 'localtime') as date,
 			MAX(sml_import_wh) as max_sml_in,
 			MIN(CASE WHEN sml_import_wh > 0 THEN sml_import_wh END) as min_sml_in,
 			MAX(sml_export_wh) as max_sml_out,
@@ -212,10 +212,26 @@ func (m *DBManager) GetDailyUsage(start, end time.Time) ([]DailyUsage, error) {
 	)
 	SELECT 
 		date,
-		COALESCE(max_sml_in - LAG(max_sml_in, 1, min_sml_in) OVER (ORDER BY date), 0) as sml_consumed,
-		COALESCE(max_sml_out - LAG(max_sml_out, 1, min_sml_out) OVER (ORDER BY date), 0) as sml_delivered,
-		COALESCE(max_sma_in - LAG(max_sma_in, 1, min_sma_in) OVER (ORDER BY date), 0) as sma_consumed,
-		COALESCE(max_sma_out - LAG(max_sma_out, 1, min_sma_out) OVER (ORDER BY date), 0) as sma_delivered
+		COALESCE(CASE 
+			WHEN LAG(max_sml_in) OVER (ORDER BY date) > 0 AND max_sml_in >= LAG(max_sml_in) OVER (ORDER BY date)
+			THEN max_sml_in - LAG(max_sml_in) OVER (ORDER BY date)
+			ELSE max_sml_in - min_sml_in
+		END, 0) as sml_consumed,
+		COALESCE(CASE 
+			WHEN LAG(max_sml_out) OVER (ORDER BY date) > 0 AND max_sml_out >= LAG(max_sml_out) OVER (ORDER BY date)
+			THEN max_sml_out - LAG(max_sml_out) OVER (ORDER BY date)
+			ELSE max_sml_out - min_sml_out
+		END, 0) as sml_delivered,
+		COALESCE(CASE 
+			WHEN LAG(max_sma_in) OVER (ORDER BY date) > 0 AND max_sma_in >= LAG(max_sma_in) OVER (ORDER BY date)
+			THEN max_sma_in - LAG(max_sma_in) OVER (ORDER BY date)
+			ELSE max_sma_in - min_sma_in
+		END, 0) as sma_consumed,
+		COALESCE(CASE 
+			WHEN LAG(max_sma_out) OVER (ORDER BY date) > 0 AND max_sma_out >= LAG(max_sma_out) OVER (ORDER BY date)
+			THEN max_sma_out - LAG(max_sma_out) OVER (ORDER BY date)
+			ELSE max_sma_out - min_sma_out
+		END, 0) as sma_delivered
 	FROM daily_max
 	ORDER BY date ASC
 	`
@@ -246,7 +262,7 @@ func (m *DBManager) GetMonthlyUsage(year int) ([]DailyUsage, error) {
 	query := `
 	WITH monthly_max AS (
 		SELECT 
-			strftime('%Y-%m', timestamp) as date,
+			strftime('%Y-%m', timestamp, 'localtime') as date,
 			MAX(sml_import_wh) as max_sml_in,
 			MIN(CASE WHEN sml_import_wh > 0 THEN sml_import_wh END) as min_sml_in,
 			MAX(sml_export_wh) as max_sml_out,
@@ -261,10 +277,26 @@ func (m *DBManager) GetMonthlyUsage(year int) ([]DailyUsage, error) {
 	)
 	SELECT 
 		date,
-		COALESCE(max_sml_in - LAG(max_sml_in, 1, min_sml_in) OVER (ORDER BY date), 0) as sml_consumed,
-		COALESCE(max_sml_out - LAG(max_sml_out, 1, min_sml_out) OVER (ORDER BY date), 0) as sml_delivered,
-		COALESCE(max_sma_in - LAG(max_sma_in, 1, min_sma_in) OVER (ORDER BY date), 0) as sma_consumed,
-		COALESCE(max_sma_out - LAG(max_sma_out, 1, min_sma_out) OVER (ORDER BY date), 0) as sma_delivered
+		COALESCE(CASE 
+			WHEN LAG(max_sml_in) OVER (ORDER BY date) > 0 AND max_sml_in >= LAG(max_sml_in) OVER (ORDER BY date)
+			THEN max_sml_in - LAG(max_sml_in) OVER (ORDER BY date)
+			ELSE max_sml_in - min_sml_in
+		END, 0) as sml_consumed,
+		COALESCE(CASE 
+			WHEN LAG(max_sml_out) OVER (ORDER BY date) > 0 AND max_sml_out >= LAG(max_sml_out) OVER (ORDER BY date)
+			THEN max_sml_out - LAG(max_sml_out) OVER (ORDER BY date)
+			ELSE max_sml_out - min_sml_out
+		END, 0) as sml_delivered,
+		COALESCE(CASE 
+			WHEN LAG(max_sma_in) OVER (ORDER BY date) > 0 AND max_sma_in >= LAG(max_sma_in) OVER (ORDER BY date)
+			THEN max_sma_in - LAG(max_sma_in) OVER (ORDER BY date)
+			ELSE max_sma_in - min_sma_in
+		END, 0) as sma_consumed,
+		COALESCE(CASE 
+			WHEN LAG(max_sma_out) OVER (ORDER BY date) > 0 AND max_sma_out >= LAG(max_sma_out) OVER (ORDER BY date)
+			THEN max_sma_out - LAG(max_sma_out) OVER (ORDER BY date)
+			ELSE max_sma_out - min_sma_out
+		END, 0) as sma_delivered
 	FROM monthly_max
 	ORDER BY date ASC
 	`

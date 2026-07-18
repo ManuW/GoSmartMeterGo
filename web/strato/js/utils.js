@@ -74,7 +74,22 @@ export function resetPowerState(elements) {
     if (elements.bar) elements.bar.style.width = "0%";
 }
 
+let fullscreenListenerAdded = false;
+
 export function toggleFullscreen(sectionId) {
+    if (!fullscreenListenerAdded) {
+        document.addEventListener('fullscreenchange', () => {
+            if (document.fullscreenElement) {
+                document.fullscreenElement.classList.add('fullscreen-card');
+                document.body.classList.add('fullscreen-mode');
+            } else {
+                document.querySelectorAll('.fullscreen-card').forEach(c => c.classList.remove('fullscreen-card'));
+                document.body.classList.remove('fullscreen-mode');
+            }
+        });
+        fullscreenListenerAdded = true;
+    }
+
     const section = document.getElementById(sectionId);
     if (!section) return;
     if (!document.fullscreenElement) {

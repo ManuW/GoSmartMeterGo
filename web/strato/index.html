@@ -101,14 +101,14 @@
                 <div class="card-header-row">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <h2 id="history-chart-title">Leistungsverlauf (Heute)</h2>
-                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;">&#x26F6;</button>
+                        <button class="btn" id="btn-history-fullscreen" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;">&#x26F6;</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn">&laquo;</button>
-                        <button class="btn">&lsaquo;</button>
+                        <button class="btn" id="btn-history-prev-7">&laquo;</button>
+                        <button class="btn" id="btn-history-prev-1">&lsaquo;</button>
                         <button class="btn active" id="btn-date-today">Heute</button>
-                        <button class="btn">&rsaquo;</button>
-                        <button class="btn">&raquo;</button>
+                        <button class="btn" id="btn-history-next-1">&rsaquo;</button>
+                        <button class="btn" id="btn-history-next-7">&raquo;</button>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
@@ -134,12 +134,12 @@
                 <div class="card-header-row">
                     <div style="display: flex; align-items: center; gap: 0.5rem;">
                         <h2 id="daily-chart-title">Tagesübersicht</h2>
-                        <button class="btn" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;">&#x26F6;</button>
+                        <button class="btn" id="btn-daily-fullscreen" title="Vollbild" style="padding: 2px 6px; font-size: 1rem;">&#x26F6;</button>
                     </div>
                     <div class="chart-controls">
-                        <button class="btn">&lsaquo;</button>
+                        <button class="btn" id="btn-daily-prev-1">&lsaquo;</button>
                         <button class="btn active" id="btn-daily-date-today">Aktuell</button>
-                        <button class="btn">&rsaquo;</button>
+                        <button class="btn" id="btn-daily-next-1">&rsaquo;</button>
                     </div>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">

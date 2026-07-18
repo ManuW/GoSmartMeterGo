@@ -32,13 +32,13 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-mode-import')?.addEventListener('click', () => setHistoryMode('import'));
     document.getElementById('btn-mode-export')?.addEventListener('click', () => setHistoryMode('export'));
     
-    document.querySelector('#history-section .chart-controls button[onclick="navigateHistory(-7)"]')?.addEventListener('click', () => navigateHistory(-7));
-    document.querySelector('#history-section .chart-controls button[onclick="navigateHistory(-1)"]')?.addEventListener('click', () => navigateHistory(-1));
+    document.getElementById('btn-history-prev-7')?.addEventListener('click', () => navigateHistory(-7));
+    document.getElementById('btn-history-prev-1')?.addEventListener('click', () => navigateHistory(-1));
     document.getElementById('btn-date-today')?.addEventListener('click', () => navigateHistory('today'));
-    document.querySelector('#history-section .chart-controls button[onclick="navigateHistory(1)"]')?.addEventListener('click', () => navigateHistory(1));
-    document.querySelector('#history-section .chart-controls button[onclick="navigateHistory(7)"]')?.addEventListener('click', () => navigateHistory(7));
+    document.getElementById('btn-history-next-1')?.addEventListener('click', () => navigateHistory(1));
+    document.getElementById('btn-history-next-7')?.addEventListener('click', () => navigateHistory(7));
     
-    document.querySelector('#history-section button[title="Vollbild"]')?.addEventListener('click', () => toggleFullscreen('history-section'));
+    document.getElementById('btn-history-fullscreen')?.addEventListener('click', () => toggleFullscreen('history-section'));
 
     // Attach event listeners for Daily Chart UI
     document.getElementById('btn-daily-scope-day')?.addEventListener('click', () => setDailyScope('day'));
@@ -53,11 +53,11 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-daily-mode-import')?.addEventListener('click', () => setDailyMode('import'));
     document.getElementById('btn-daily-mode-export')?.addEventListener('click', () => setDailyMode('export'));
     
-    document.querySelector('#daily-section .chart-controls button[onclick="navigateDaily(-1)"]')?.addEventListener('click', () => navigateDaily(-1));
+    document.getElementById('btn-daily-prev-1')?.addEventListener('click', () => navigateDaily(-1));
     document.getElementById('btn-daily-date-today')?.addEventListener('click', () => navigateDaily('today'));
-    document.querySelector('#daily-section .chart-controls button[onclick="navigateDaily(1)"]')?.addEventListener('click', () => navigateDaily(1));
+    document.getElementById('btn-daily-next-1')?.addEventListener('click', () => navigateDaily(1));
     
-    document.querySelector('#daily-section button[title="Vollbild"]')?.addEventListener('click', () => toggleFullscreen('daily-section'));
+    document.getElementById('btn-daily-fullscreen')?.addEventListener('click', () => toggleFullscreen('daily-section'));
 });
 
 function startLiveStream() {
