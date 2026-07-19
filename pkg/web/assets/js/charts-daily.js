@@ -7,6 +7,7 @@ export let dailyChart = null;
 export let currentDailyScope = 'week';
 export let currentDailySource = 'SMA';
 export let currentDailyMode = 'both';
+export let currentDailyUnit = 'auto';
 export let currentDailyDate = new Date();
 export let lastDailyRawData = [];
 
@@ -133,6 +134,14 @@ export async function loadDailyUsageData() {
     }
 }
 
+export function setDailyUnit(unit) {
+    currentDailyUnit = unit;
+    document.getElementById('btn-daily-unit-auto')?.classList.toggle('active', unit === 'auto');
+    document.getElementById('btn-daily-unit-kwh')?.classList.toggle('active', unit === 'kwh');
+    document.getElementById('btn-daily-unit-wh')?.classList.toggle('active', unit === 'wh');
+    renderDailyChart();
+}
+
 export function renderDailyChart() {
     if (!dailyChart) return;
     
@@ -178,10 +187,10 @@ export function renderDailyChart() {
         }
     }
 
-    let consumedBgColors = 'rgba(245, 158, 11, 0.75)';
-    let consumedBorderColors = '#f59e0b';
-    let deliveredBgColors = 'rgba(16, 185, 129, 0.75)';
-    let deliveredBorderColors = '#10b981';
+    let consumedBgColors = [];
+    let consumedBorderColors = [];
+    let deliveredBgColors = [];
+    let deliveredBorderColors = [];
 
     if (currentDailyScope === 'day') {
         if (lastDailyRawData.length > 0) {
@@ -202,11 +211,6 @@ export function renderDailyChart() {
                 hourlyReadings[hour] = item;
             });
 
-            consumedBgColors = [];
-            consumedBorderColors = [];
-            deliveredBgColors = [];
-            deliveredBorderColors = [];
-
             let hoursSinceLastReading = 0;
 
             for (let h = 0; h < 24; h++) {
@@ -216,10 +220,8 @@ export function renderDailyChart() {
                     const currentDel = (currentDailySource === 'SMA' ? currentItem.sma_export_wh : currentItem.sml_export_wh) || 0;
 
                     if (currentCon > 0 && prevCon > 0) {
-                        const deltaCon = Math.max(0, currentCon - prevCon);
-                        consumed[h] = deltaCon / 1000.0;
+                        consumed[h] = Math.max(0, currentCon - prevCon);
                         prevCon = currentCon;
-
                         if (hoursSinceLastReading > 0) {
                             consumedBgColors.push('rgba(156, 163, 175, 0.5)');
                             consumedBorderColors.push('#9ca3af');
@@ -233,10 +235,8 @@ export function renderDailyChart() {
                     }
                     
                     if (currentDel > 0 && prevDel > 0) {
-                        const deltaDel = Math.max(0, currentDel - prevDel);
-                        delivered[h] = deltaDel / 1000.0;
+                        delivered[h] = Math.max(0, currentDel - prevDel);
                         prevDel = currentDel;
-
                         if (hoursSinceLastReading > 0) {
                             deliveredBgColors.push('rgba(156, 163, 175, 0.5)');
                             deliveredBorderColors.push('#9ca3af');
@@ -260,6 +260,12 @@ export function renderDailyChart() {
             }
         }
     } else {
+        // Fallback colors for other scopes
+        consumedBgColors = 'rgba(245, 158, 11, 0.75)';
+        consumedBorderColors = '#f59e0b';
+        deliveredBgColors = 'rgba(16, 185, 129, 0.75)';
+        deliveredBorderColors = '#10b981';
+
         lastDailyRawData.forEach(item => {
             let valCon = (currentDailySource === 'SMA' ? item.sma_consumed_wh : item.sml_consumed_wh) || 0;
             let valDel = (currentDailySource === 'SMA' ? item.sma_delivered_wh : item.sml_delivered_wh) || 0;
@@ -283,11 +289,38 @@ export function renderDailyChart() {
             }
 
             if (idx >= 0 && idx < consumed.length) {
-                consumed[idx] = valCon / 1000.0;
-                delivered[idx] = valDel / 1000.0;
+                consumed[idx] = valCon;
+                delivered[idx] = valDel;
             }
         });
     }
+
+    let scaleToWh = false;
+    if (currentDailyUnit === 'wh') {
+        scaleToWh = true;
+    } else if (currentDailyUnit === 'kwh') {
+        scaleToWh = false;
+    } else {
+        let maxVal = 0;
+        const showImport = currentDailyMode === 'both' || currentDailyMode === 'import';
+        const showExport = currentDailyMode === 'both' || currentDailyMode === 'export';
+        for (let i = 0; i < consumed.length; i++) {
+            if (showImport && consumed[i] !== null) maxVal = Math.max(maxVal, consumed[i]);
+            if (showExport && delivered[i] !== null) maxVal = Math.max(maxVal, delivered[i]);
+        }
+        scaleToWh = maxVal > 0 && maxVal < 2000;
+    }
+
+    if (!scaleToWh) {
+        for (let i = 0; i < consumed.length; i++) {
+            if (consumed[i] !== null) consumed[i] /= 1000.0;
+            if (delivered[i] !== null) delivered[i] /= 1000.0;
+        }
+    }
+
+    const unit = scaleToWh ? 'Wh' : 'kWh';
+    dailyChart.data.datasets[0].label = `Verbrauch (${unit})`;
+    dailyChart.data.datasets[1].label = `Einspeisung (${unit})`;
 
     dailyChart.data.labels = labels;
     dailyChart.data.datasets[0].data = consumed;
@@ -322,7 +355,7 @@ export function setDailyMode(mode) {
     document.getElementById('btn-daily-mode-both').classList.toggle('active', mode === 'both');
     document.getElementById('btn-daily-mode-import').classList.toggle('active', mode === 'import');
     document.getElementById('btn-daily-mode-export').classList.toggle('active', mode === 'export');
-    updateDailyChartVisibility();
+    renderDailyChart();
 }
 
 export function navigateDaily(offset) {

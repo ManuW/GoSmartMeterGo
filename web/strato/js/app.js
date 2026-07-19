@@ -6,7 +6,7 @@ import {
 } from './charts-history.js';
 import { 
     initDailyChart, loadDailyUsageData, setDailyScope, 
-    setDailySource, setDailyMode, navigateDaily, dailyChart
+    setDailySource, setDailyMode, setDailyUnit, navigateDaily, dailyChart
 } from './charts-daily.js';
 import { fetchLatest } from './api.js';
 import { updateBadge, updateMeterValues, getPowerState, applyPowerState, resetPowerState, formatNum, toggleFullscreen } from './utils.js';
@@ -62,6 +62,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-daily-prev-1')?.addEventListener('click', () => navigateDaily(-1));
     document.getElementById('btn-daily-date-today')?.addEventListener('click', () => navigateDaily('today'));
     document.getElementById('btn-daily-next-1')?.addEventListener('click', () => navigateDaily(1));
+    
+    document.getElementById('btn-daily-unit-auto')?.addEventListener('click', () => setDailyUnit('auto'));
+    document.getElementById('btn-daily-unit-kwh')?.addEventListener('click', () => setDailyUnit('kwh'));
+    document.getElementById('btn-daily-unit-wh')?.addEventListener('click', () => setDailyUnit('wh'));
     
     document.getElementById('btn-daily-fullscreen')?.addEventListener('click', () => toggleFullscreen('daily-section'));
 });
